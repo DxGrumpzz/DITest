@@ -1,4 +1,4 @@
-﻿namespace DITest
+namespace DITest
 {
     using System;
     using System.Collections.Generic;
@@ -108,34 +108,49 @@
             {
                 Guid typeID = GetTypeID<T>();
 
+                // Find the requested service
                 var serviceItem = _services[typeID];
 
 
+                // If the requested service is a singleton...
                 if (serviceItem.ScopeType == ScopeType.Singleton)
                 {
+                    // Find an instance from the singletons list
                     var instance = _singletonServices[typeID];
 
+                    // If the instance is null...
                     if (instance == null)
                     {
+                        // Get the factory function
                         var instanceFactory = serviceItem.ImplementationFactory;
 
-
                         if (instanceFactory != null)
+                            // Create a new singleton instance from the factory function
                             instance = instanceFactory.Invoke();
                         else
+                        {
+                            // This might happen ? 
+                            Debugger.Break();
+
                             // Constraining T to new() might not be a good idea since some "constructor-less" 
                             // types have to be called through GetService<T>() 
                             instance = Activator.CreateInstance(serviceItem.ImplementationType);
+                        }
 
+                        // Since the instance variable isn't actually *the* instance (reference), when we assign to it we need
+                        // to also update the actual instance
                         _singletonServices[typeID] = instance;
                     };
+
 
                     return (T)instance;
                 };
 
 
+                // If the requested service is a transient...
                 if (serviceItem.ScopeType == ScopeType.Transient)
                 {
+                    // Create an instance from the associated factory function
                     var instance = serviceItem.ImplementationFactory();
 
                     return (T)instance;
