@@ -1,4 +1,4 @@
-namespace DITest
+﻿namespace DITest
 {
     using System;
     using System.Collections.Generic;
@@ -91,12 +91,12 @@ namespace DITest
             /// <summary>
             /// The main list of bound services
             /// </summary>
-            private Dictionary<Guid, ServiceDescriptor> _services = new Dictionary<Guid, ServiceDescriptor>();
+            private readonly Dictionary<Guid, ServiceDescriptor> _services = new Dictionary<Guid, ServiceDescriptor>();
 
             /// <summary>
             /// A list of singleton service that were instantiated
             /// </summary>
-            private Dictionary<Guid, object> _singletonServices = new Dictionary<Guid, object>();
+            private readonly Dictionary<Guid, object> _singletonServices = new Dictionary<Guid, object>();
 
 
             /// <summary>
@@ -170,23 +170,7 @@ namespace DITest
             public void AddSingleton<T>()
                 where T : class, new()
             {
-                Guid typeID = GetTypeID<T>();
-
-                // Create the service descriptor
-                _services.Add(typeID, new ServiceDescriptor()
-                {
-                    Type = typeof(T),
-                    ImplementationType = typeof(T),
-                    ScopeType = ScopeType.Singleton,
-
-                    // Since this method requires the service to have a parameterless constructor,
-                    // we can create a factory that returns an instance of T by calling said constructor
-                    ImplementationFactory = () => { return new T(); },
-                });
-
-
-                // Add the service to the list of singletons that will be later invoked when requested
-                _singletonServices.Add(typeID, null);
+                AddSingleton<T, T>(() => { return new T(); });
             }
 
 
@@ -198,18 +182,7 @@ namespace DITest
             public void AddSingleton<T>(Func<T> implementationFactory)
                 where T : class
             {
-                Guid typeID = GetTypeID<T>();
-
-                // Create service descriptor
-                _services.Add(typeID, new ServiceDescriptor()
-                {
-                    Type = typeof(T),
-                    ScopeType = ScopeType.Singleton,
-                    ImplementationFactory = () => implementationFactory(),
-                });
-
-                // Add the service to the list of singletons that will be later invoked when requested
-                _singletonServices.Add(typeID, null);
+                AddSingleton<T, T>(implementationFactory);
             }
 
 
@@ -224,19 +197,7 @@ namespace DITest
                 where T : class
                 where TImplementation : T, new()
             {
-                Guid typeID = GetTypeID<T>();
-
-                // Create service descriptor
-                _services.Add(typeID, new ServiceDescriptor()
-                {
-                    Type = typeof(T),
-                    ImplementationType = typeof(TImplementation),
-                    ScopeType = ScopeType.Singleton,
-                    ImplementationFactory = () => { return new TImplementation(); },
-                });
-
-                // Add the service to the list of singletons that will be later invoked when requested
-                _singletonServices.Add(typeID, null);
+                AddSingleton<T, TImplementation>(() => { return new TImplementation(); });
             }
 
 
@@ -277,17 +238,7 @@ namespace DITest
             public void AddTransient<T>()
                 where T : class, new()
             {
-                Guid typeID = GetTypeID<T>();
-
-                // Create service descriptor
-                _services.Add(typeID, new ServiceDescriptor()
-                {
-                    Type = typeof(T),
-                    ImplementationType = typeof(T),
-                    ScopeType = ScopeType.Transient,
-
-                    ImplementationFactory = () => { return new T(); },
-                });
+                AddTransient<T, T>(() => { return new T(); });
             }
 
 
@@ -299,17 +250,7 @@ namespace DITest
             public void AddTransient<T>(Func<T> implementationFactory)
                 where T : class
             {
-                Guid typeID = GetTypeID<T>();
-
-                // Create service descriptor
-                _services.Add(typeID, new ServiceDescriptor()
-                {
-                    Type = typeof(T),
-                    ImplementationType = typeof(T),
-                    ScopeType = ScopeType.Transient,
-
-                    ImplementationFactory = () => implementationFactory(),
-                });
+                AddTransient<T, T>(implementationFactory);
             }
 
 
@@ -324,18 +265,7 @@ namespace DITest
                 where T : class
                 where TImplementation : T, new()
             {
-                Guid typeID = GetTypeID<T>();
-
-                // Create service descriptor
-                _services.Add(typeID, new ServiceDescriptor()
-                {
-                    Type = typeof(T),
-                    ImplementationType = typeof(TImplementation),
-                    ScopeType = ScopeType.Transient,
-
-                    ImplementationFactory = () => { return new TImplementation(); },
-                });
-
+                AddTransient<T, TImplementation>(() => { return new TImplementation(); });
             }
 
 
