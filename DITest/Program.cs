@@ -27,7 +27,7 @@
         /// <summary>
         /// A simple accessor for the DI
         /// </summary>
-        private static class DI
+        public static class DI
         {
             /// <summary>
             /// A DI container which this class is "bound" to 
@@ -193,7 +193,7 @@
             /// </summary>
             /// <typeparam name="T"></typeparam>
             /// <typeparam name="TImplementation"></typeparam>
-            public void AddSingelton<T, TImplementation>()
+            public void AddSingleton<T, TImplementation>()
                 where T : class
                 where TImplementation : T, new()
             {
